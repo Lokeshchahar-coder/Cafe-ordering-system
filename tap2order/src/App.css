@@ -1,0 +1,239 @@
+/* ===== Global Enhancements ===== */
+:root {
+  --accent: #facc15;
+  --accent-bg: rgba(250, 204, 21, 0.1);
+  --accent-border: rgba(250, 204, 21, 0.5);
+  --border: rgba(255, 255, 255, 0.1);
+  --text-h: #ffffff;
+  --social-bg: rgba(255, 255, 255, 0.05);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Counter ===== */
+.counter {
+  font-size: 16px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  margin-bottom: 24px;
+  letter-spacing: 0.5px;
+}
+
+.counter:hover {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+  transform: translateY(-2px);
+}
+
+.counter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ===== Hero Section ===== */
+.hero {
+  position: relative;
+}
+
+.hero .base,
+.hero .framework,
+.hero .vite {
+  inset-inline: 0;
+  margin: 0 auto;
+}
+
+.hero .base {
+  width: 180px;
+  position: relative;
+  z-index: 0;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+}
+
+.hero .framework,
+.hero .vite {
+  position: absolute;
+  transition: transform 0.6s ease;
+}
+
+.hero .framework {
+  z-index: 2;
+  top: 34px;
+  height: 30px;
+  transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
+}
+
+.hero .vite {
+  z-index: 1;
+  top: 110px;
+  height: 28px;
+  transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.85);
+}
+
+.hero:hover .framework {
+  transform: scale(1.5) rotate(10deg);
+}
+
+.hero:hover .vite {
+  transform: scale(1) rotate(-10deg);
+}
+
+/* ===== Center Section ===== */
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+}
+
+@media (max-width: 1024px) {
+  #center {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+/* ===== Next Steps ===== */
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+  backdrop-filter: blur(12px);
+}
+
+#next-steps > div {
+  flex: 1 1 0;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+#next-steps > div:hover {
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-4px);
+}
+
+#next-steps .icon {
+  margin-bottom: 16px;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.5));
+}
+
+@media (max-width: 1024px) {
+  #next-steps {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  #next-steps > div {
+    padding: 24px 20px;
+  }
+}
+
+/* ===== Docs Section ===== */
+#docs {
+  border-right: 1px solid var(--border);
+}
+
+@media (max-width: 1024px) {
+  #docs {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* ===== Links ===== */
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  margin: 32px 0 0;
+}
+
+#next-steps ul .logo {
+  height: 18px;
+}
+
+#next-steps ul a {
+  color: var(--text-h);
+  font-size: 15px;
+  border-radius: 999px;
+  background: var(--social-bg);
+  display: flex;
+  padding: 8px 14px;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+#next-steps ul a:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+  background: rgba(250, 204, 21, 0.1);
+}
+
+#next-steps ul a .button-icon {
+  height: 18px;
+  width: 18px;
+}
+
+@media (max-width: 1024px) {
+  #next-steps ul {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #next-steps ul li {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  #next-steps ul a {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ===== Spacer ===== */
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 1024px) {
+  #spacer {
+    height: 48px;
+  }
+}
+
+/* ===== Decorative Ticks ===== */
+.ticks {
+  position: relative;
+  width: 100%;
+}
+
+.ticks::before,
+.ticks::after {
+  content: '';
+  position: absolute;
+  top: -4.5px;
+  border: 6px solid transparent;
+}
+
+.ticks::before {
+  left: 0;
+  border-left-color: var(--accent);
+}
+
+.ticks::after {
+  right: 0;
+  border-right-color: var(--accent);
+}

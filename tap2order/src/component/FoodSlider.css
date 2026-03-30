@@ -1,0 +1,115 @@
+/* =========================
+   🎯 BASE SLIDE ANIMATION
+========================= */
+.slide {
+  transition: transform 0.4s ease, box-shadow 0.3s ease;
+  will-change: transform;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* =========================
+   🔥 HOVER EFFECT (DESKTOP)
+========================= */
+.slide:hover {
+  transform: scale(1.05);
+}
+
+/* =========================
+   🎞️ SLICK SLIDE BASE STATE
+========================= */
+.slick-slide {
+  opacity: 0.6;
+  transform: scale(0.95);
+  transition: all 0.4s ease;
+}
+
+/* =========================
+   ✅ ACTIVE SLIDE
+========================= */
+.slick-slide.slick-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* =========================
+   🎯 CENTER MODE (PREMIUM LOOK)
+========================= */
+.slick-center {
+  transform: scale(1.08);
+  opacity: 1;
+  z-index: 10;
+}
+
+/* =========================
+   💎 ACTIVE CARD SHADOW
+========================= */
+.slick-slide.slick-active .slide {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================
+   🎯 SLICK TRACK FIX
+========================= */
+.slick-track {
+  display: flex;
+  align-items: stretch;
+}
+
+/* =========================
+   🎯 SLIDE HEIGHT FIX
+========================= */
+.slick-slide > div {
+  height: 100%;
+}
+
+/* =========================
+   🎯 IMAGE SMOOTHNESS
+========================= */
+.slide img {
+  transition: transform 0.4s ease;
+}
+
+.slide:hover img {
+  transform: scale(1.08);
+}
+
+/* =========================
+   📱 MOBILE OPTIMIZATION
+========================= */
+@media (max-width: 768px) {
+  .slide:hover {
+    transform: none; /* disable hover zoom on mobile */
+  }
+
+  .slide:hover img {
+    transform: none;
+  }
+
+  .slick-slide {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  .slick-center {
+    transform: scale(1);
+  }
+}
+
+/* =========================
+   ⚡ EXTRA SMOOTH SCROLLING
+========================= */
+.slick-list {
+  margin: 0 -10px;
+}
+
+.slick-slide {
+  padding: 0 10px;
+}
+
+/* =========================
+   🎯 REMOVE OUTLINE (CLEAN UI)
+========================= */
+.slick-slide:focus {
+  outline: none;
+}
