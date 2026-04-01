@@ -9,7 +9,7 @@ async function startServer() {
     await connectDB(process.env.MONGO_URI);
     console.log("MongoDB connected");
 
-    const port = Number(process.env.PORT) || 5000;
+    const port = Number(process.env.PORT) || 8001;
     const host = process.env.HOST || "0.0.0.0";
     console.log("[DEBUG] Starting listener on port", port);
     app.listen(port, host, () => {

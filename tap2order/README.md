@@ -1,18 +1,23 @@
-# React + Vite
+# Tap2Order Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Local setup
+1. Go to this folder.
+2. Install dependencies:
+	- `npm install`
+3. (Optional) create env file:
+	- `cp .env.example .env`
+4. Start dev server:
+	- `npm run dev`
 
-Currently, two official plugins are available:
+Default frontend URL: `http://localhost:5173`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Backend connection
+- In development, frontend uses Vite proxy:
+  - `/api/*` -> `http://localhost:8001`
+- Keep backend running on port `8001` (or update `vite.config.js` proxy target).
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Common issue on teammate systems
+If UI loads but API calls fail:
+1. Check backend is running (`GET http://localhost:8001/api/health`).
+2. Check backend `.env` has valid `MONGO_URI`.
+3. Restart both frontend and backend after env changes.
