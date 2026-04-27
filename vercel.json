@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd tap2order && npm run build",
+  "outputDirectory": "tap2order/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

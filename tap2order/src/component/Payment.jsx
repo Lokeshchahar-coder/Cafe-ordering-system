@@ -26,6 +26,8 @@ const Payment = () => {
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [showExtraCharges, setShowExtraCharges] = useState(false);
   const [orderType, setOrderType] = useState("dine");
+  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (
@@ -120,7 +122,64 @@ const Payment = () => {
     }
   };
 
-  const handlePayment = () => {
+  const placeOrder = async ({ normalizedPhone, isPaid }) => {
+    const orderData = {
+      ...formData,
+      customerName: formData.customerName.trim(),
+      customerPhone: normalizedPhone,
+      orderType,
+      paymentMethod,
+      paymentStatus: isPaid ? "Paid" : "Pay at counter",
+      cartItems,
+      totalPrice: finalPayableAmount,
+      timestamp: new Date(),
+    };
+
+    await fetch(
+      "https://check-18079-default-rtdb.firebaseio.com/ff.json",
+      {
+        method: "POST",
+        body: JSON.stringify(orderData),
+      }
+    );
+
+    setOrderPlaced(true);
+
+    const notifyResult = await notifyThankYou({
+      customerName: orderData.customerName,
+      customerPhone: orderData.customerPhone,
+      totalAmount: finalPayableAmount,
+      orderType,
+      itemCount: cartItems.reduce((sum, item) => sum + Number(item.qty || 0), 0),
+    });
+
+    setThankYouStatus(notifyResult);
+
+    if (notifyResult.sent) {
+      Swal.fire({
+        icon: "success",
+        title: "Thank-you note sent",
+        text: `A confirmation SMS has been sent to ${orderData.customerPhone}`,
+      });
+    } else {
+      Swal.fire({
+        icon: "info",
+        title: "Order placed",
+        text: "Order is placed successfully. Thank-you SMS may be delayed.",
+      });
+    }
+
+    emailjs.send(
+      "service_48qpquj",
+      "template_agxpbka",
+      {
+        totalAmount: finalPayableAmount,
+      },
+      "Q9yA1C4PTHSCKXkVT"
+    );
+  };
+
+  const handlePayment = async () => {
     if (!formData.customerName.trim()) return Swal.fire("Enter customer name");
     if (!formData.customerPhone.trim()) return Swal.fire("Enter phone number");
 
@@ -134,6 +193,33 @@ const Payment = () => {
     if (orderType === "take" && !formData.vehicleNumber)
       return Swal.fire("Enter vehicle number");
 
+    if (isSubmitting) return;
+
+    if (paymentMethod === "cash") {
+      const decision = await Swal.fire({
+        icon: "question",
+        title: "Confirm cash payment",
+        text: "Your order will be placed and payment will be collected at counter.",
+        showCancelButton: true,
+        confirmButtonText: "Place Order",
+      });
+
+      if (!decision.isConfirmed) return;
+
+      try {
+        setIsSubmitting(true);
+        await placeOrder({ normalizedPhone, isPaid: false });
+        Swal.fire({
+          icon: "success",
+          title: "Order placed 🎉",
+          text: "Please pay at the counter while collecting your order.",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (!razorpayLoaded)
       return Swal.fire("Payment system loading...");
 
@@ -143,60 +229,13 @@ const Payment = () => {
       currency: "INR",
       name: "GD Cafe",
       handler: async () => {
-        Swal.fire("Payment Successful 🎉");
-
-        const orderData = {
-          ...formData,
-          customerName: formData.customerName.trim(),
-          customerPhone: normalizedPhone,
-          orderType,
-          cartItems,
-          totalPrice: finalPayableAmount,
-          timestamp: new Date(),
-        };
-
-        await fetch(
-          "https://check-18079-default-rtdb.firebaseio.com/ff.json",
-          {
-            method: "POST",
-            body: JSON.stringify(orderData),
-          }
-        );
-
-        setOrderPlaced(true);
-
-        const notifyResult = await notifyThankYou({
-          customerName: orderData.customerName,
-          customerPhone: orderData.customerPhone,
-          totalAmount: finalPayableAmount,
-          orderType,
-          itemCount: cartItems.reduce((sum, item) => sum + Number(item.qty || 0), 0),
-        });
-
-        setThankYouStatus(notifyResult);
-
-        if (notifyResult.sent) {
-          Swal.fire({
-            icon: "success",
-            title: "Thank-you note sent",
-            text: `A confirmation SMS has been sent to ${orderData.customerPhone}`,
-          });
-        } else {
-          Swal.fire({
-            icon: "info",
-            title: "Order placed",
-            text: "Order is placed successfully. Thank-you SMS may be delayed.",
-          });
+        try {
+          setIsSubmitting(true);
+          Swal.fire("Payment Successful 🎉");
+          await placeOrder({ normalizedPhone, isPaid: true });
+        } finally {
+          setIsSubmitting(false);
         }
-
-        emailjs.send(
-          "service_48qpquj",
-          "template_agxpbka",
-          {
-            totalAmount: finalPayableAmount,
-          },
-          "Q9yA1C4PTHSCKXkVT"
-        );
       },
       theme: { color: "#facc15" },
     };
@@ -365,11 +404,42 @@ const Payment = () => {
             </p>
           </div>
 
+          <div className="mt-4">
+            <p className="text-sm text-gray-300 mb-2">Payment Method</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPaymentMethod("online")}
+                className={`flex-1 py-2 rounded-lg ${
+                  paymentMethod === "online"
+                    ? "bg-yellow-400 text-black"
+                    : "bg-white/10"
+                }`}
+              >
+                Online
+              </button>
+              <button
+                onClick={() => setPaymentMethod("cash")}
+                className={`flex-1 py-2 rounded-lg ${
+                  paymentMethod === "cash"
+                    ? "bg-yellow-400 text-black"
+                    : "bg-white/10"
+                }`}
+              >
+                Cash at Counter
+              </button>
+            </div>
+          </div>
+
           <button
             onClick={handlePayment}
+            disabled={isSubmitting}
             className="w-full mt-4 py-3 bg-yellow-400 text-black rounded-lg font-semibold hover:bg-yellow-300"
           >
-            Pay Now
+            {isSubmitting
+              ? "Processing..."
+              : paymentMethod === "cash"
+              ? "Place Order (Pay at Counter)"
+              : "Pay Now"}
           </button>
         </div>
       </div>
