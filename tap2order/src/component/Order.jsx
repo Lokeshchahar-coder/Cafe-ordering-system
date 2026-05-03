@@ -2,15 +2,30 @@ import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const ORDER_DB_URL = "https://check-18079-default-rtdb.firebaseio.com/ff";
+
+const normalizeStatus = (value, fallback = "pending") =>
+  typeof value === "string" && value.trim()
+    ? value.trim().toLowerCase()
+    : fallback;
+
+const formatLabel = (value) =>
+  String(value || "-")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+const isReadyForKitchen = (order) =>
+  normalizeStatus(order.paymentStatus) === "paid";
+
 const KitchenDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch(
-        "https://check-18079-default-rtdb.firebaseio.com/ff.json"
-      );
+      const response = await fetch(`${ORDER_DB_URL}.json`, {
+        cache: "no-store",
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch data.");
       }
@@ -22,15 +37,16 @@ const KitchenDashboard = () => {
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1); // Set to the start of tomorrow (midnight)
 
-      // Filter orders to show only today's orders
-      const filteredOrders = Object.entries(data)
+      // Filter orders to show only today's paid orders
+      const filteredOrders = Object.entries(data || {})
         .map(([id, order]) => ({
           id,
           ...order,
         }))
         .filter((order) => {
           const orderDate = new Date(order.timestamp);
-          return orderDate >= today && orderDate < tomorrow;
+          const isPaidOrder = normalizeStatus(order.paymentStatus) === "paid";
+          return orderDate >= today && orderDate < tomorrow && isPaidOrder;
         })
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -56,6 +72,33 @@ const KitchenDashboard = () => {
     printWindow.document.write("</body></html>");
     printWindow.document.close();
     printWindow.print();
+  };
+
+  const updateOrderStatus = async (orderId, status) => {
+    const response = await fetch(`${ORDER_DB_URL}/${orderId}.json`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update order status");
+    }
+  };
+
+  const markReady = async (orderId) => {
+    try {
+      await updateOrderStatus(orderId, "ready");
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, status: "ready" } : order
+        )
+      );
+      toast.success("Order marked ready.");
+    } catch (_error) {
+      toast.error("Failed to update order.");
+    }
   };
 
   return (
@@ -93,14 +136,22 @@ const KitchenDashboard = () => {
                   </h3>
                   <div
                     className={`text-sm font-semibold px-3 py-1 rounded-full ${
-                      order.status === "Completed"
+                      normalizeStatus(order.status) === "ready"
                         ? "bg-green-100 text-green-600"
+                        : normalizeStatus(order.status) === "preparing"
+                        ? "bg-yellow-100 text-yellow-700"
                         : "bg-green-100 text-green-600"
                     }`}
                   >
-                    {order.status}
+                    {formatLabel(order.status)}
                   </div>
                 </div>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Payment Status:</span> {formatLabel(order.paymentStatus)}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Payment Method:</span> {formatLabel(order.paymentMethod)}
+                </p>
                 <p className="text-gray-700 mb-2">
                   <span className="font-semibold">Order Number:</span> {order.id}
                 </p>
@@ -118,7 +169,7 @@ const KitchenDashboard = () => {
                 <div className="text-gray-700">
                   <span className="font-semibold">Items:</span>
                   <ul className="list-disc pl-5 mt-1 text-sm">
-                    {order.cartItems.map((item, index) => (
+                    {order.cartItems?.map((item, index) => (
                       <li key={index}>
                         {item.name} x {item.qty}
                       </li>
@@ -127,15 +178,25 @@ const KitchenDashboard = () => {
                 </div>
                 <p className="mt-2 text-sm text-gray-500">
                   <span className="font-semibold">Ordered At:</span>{" "}
-                  {new Date(order.timestamp).toLocaleDateString()}{" "}
+                  {new Date(order.timestamp).toLocaleDateString()} {" "}
                   {new Date(order.timestamp).toLocaleTimeString()}
                 </p>
-                <button
-                  onClick={() => handlePrint(order.id)}
-                  className="mt-4 text-sm text-blue-600 hover:underline"
-                >
-                  Print Bill
-                </button>
+                <div className="mt-4 flex gap-3">
+                  {normalizeStatus(order.status) === "preparing" && (
+                    <button
+                      onClick={() => markReady(order.id)}
+                      className="text-sm bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                    >
+                      Mark Ready
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handlePrint(order.id)}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    Print Bill
+                  </button>
+                </div>
               </div>
             ))}
           </div>

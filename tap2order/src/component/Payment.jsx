@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 import emailjs from "emailjs-com";
 import { FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa";
 
+const ORDER_DB_URL = "https://check-18079-default-rtdb.firebaseio.com/ff";
+
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -129,18 +131,33 @@ const Payment = () => {
       customerPhone: normalizedPhone,
       orderType,
       paymentMethod,
-      paymentStatus: isPaid ? "Paid" : "Pay at counter",
+      paymentStatus: isPaid ? "paid" : "pending",
+      status: isPaid ? "preparing" : "pending_payment",
       cartItems,
       totalPrice: finalPayableAmount,
       timestamp: new Date(),
     };
 
-    await fetch(
-      "https://check-18079-default-rtdb.firebaseio.com/ff.json",
-      {
-        method: "POST",
-        body: JSON.stringify(orderData),
-      }
+    const response = await fetch(`${ORDER_DB_URL}.json`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+      body: JSON.stringify(orderData),
+    });
+
+    const createdOrder = await response.json().catch(() => ({}));
+
+    localStorage.setItem(
+      "latestPlacedOrder",
+      JSON.stringify({
+        id: createdOrder?.name || null,
+        timestamp: new Date().toISOString(),
+        paymentMethod,
+        paymentStatus: orderData.paymentStatus,
+        orderData,
+      })
     );
 
     setOrderPlaced(true);
