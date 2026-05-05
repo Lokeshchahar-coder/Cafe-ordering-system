@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FacebookIcon, InstagramIcon, Mail } from "lucide-react";
+import { Facebook, Instagram, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -30,7 +30,7 @@ const Footer = () => {
               aria-label="Facebook"
               className="p-2 rounded-full border border-gray-600 hover:bg-yellow-400 hover:text-black transition-all duration-300"
             >
-              <FacebookIcon size={18} />
+              <Facebook size={24} />
             </a>
 
             <a
@@ -38,7 +38,7 @@ const Footer = () => {
               aria-label="Instagram"
               className="p-2 rounded-full border border-gray-600 hover:bg-yellow-400 hover:text-black transition-all duration-300"
             >
-              <InstagramIcon size={18} />
+              <Instagram size={24} />
             </a>
 
             <a
@@ -46,7 +46,7 @@ const Footer = () => {
               aria-label="Email"
               className="p-2 rounded-full border border-gray-600 hover:bg-yellow-400 hover:text-black transition-all duration-300"
             >
-              <Mail size={18} />
+              <Mail size={24} />
             </a>
           </div>
         </div>
